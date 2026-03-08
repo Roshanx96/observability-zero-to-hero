@@ -252,15 +252,4 @@ Senior DevOps engineers typically monitor:
 
 ```
 
-If you're building a **DevOps portfolio repo**, I can also give you a **complete `Kubernetes Monitoring README.md` (like senior engineers write)** including:
 
-- Architecture diagram  
-- Prometheus + Grafana setup  
-- Helm installation  
-- Storage (EBS)  
-- Alertmanager rules  
-- PromQL queries  
-- Troubleshooting commands  
-
-It will look **very strong on GitHub for DevOps interviews.**
-```
