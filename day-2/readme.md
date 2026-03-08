@@ -115,6 +115,11 @@ helm install monitoring prometheus-community/kube-prometheus-stack \
 -n monitoring \
 -f ./custom_kube_prometheus_stack.yml
 ```
+💡 monitoring:  This is the Helm release name.Helm identifies the installation using this name. || Example: '''helm list -n monitoring'''
+💡 prometheus-community/kube-prometheus-stack: -prometheus-community → Helm repository      -kube-prometheus-stack → Chart name
+💡 \: Backslash means command continues on next line in Linux.
+💡-n monitoring: This specifies the namespace.
+💡-f ./custom_kube_prometheus_stack.yml:  -f means values file. It overrides the default chart configuration.
 
 ### ✅ Step 4: Verify the Installation
 ```bash
