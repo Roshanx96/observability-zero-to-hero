@@ -119,8 +119,7 @@ helm install monitoring prometheus-community/kube-prometheus-stack \
 - 💡 **prometheus-community/kube-prometheus-stack:** prometheus-community → Helm repository | kube-prometheus-stack → Chart name
 - 💡 **\:** Backslash means command continues on next line in Linux.
 - 💡 **-n monitoring:** This specifies the namespace.
-- 💡 **-f ./custom_kube_prometheus_stack.yml:**  -f means values file. It overrides the default chart configuration. -f custom_kube_prometheus_stack.yml does NOT replace the chart’s values.yaml file.
-It overrides only the values you specify, while the rest remain from the default values.yaml.
+- 💡 **-f ./custom_kube_prometheus_stack.yml:**  -f means values file. It overrides the default chart configuration. -f custom_kube_prometheus_stack.yml does NOT replace the chart’s values.yaml file. It overrides only the values you specify, while the rest remain from the default values.yaml.
 
 ### ✅ Step 4: Verify the Installation
 ```bash
