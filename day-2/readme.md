@@ -363,7 +363,166 @@ Applications ------------|           |
 
 ---
 
-  
+# How Can a Single Pod Have Multiple Services in Kubernetes?
+
+This is a common question when working with Kubernetes monitoring stacks like **kube-prometheus-stack**.
+
+## Key Concept
+
+In **Kubernetes**, a **Pod does not own or contain Services**.
+Instead, **Services select Pods using labels**.
+
+Because of this design:
+
+* One Service → can route traffic to many Pods
+* Multiple Services → can route traffic to the same Pod
+
+So it is completely valid for **multiple Services to point to the same Pod**.
+
+---
+
+# Example From Monitoring Stack
+
+Alertmanager pods created by the monitoring stack:
+
+```text
+alertmanager-monitoring-kube-prometheus-alertmanager-0
+alertmanager-monitoring-kube-prometheus-alertmanager-1
+```
+
+Two services point to these same pods:
+
+```text
+service/monitoring-kube-prometheus-alertmanager
+service/alertmanager-operated
+```
+
+---
+
+# Service 1: monitoring-kube-prometheus-alertmanager
+
+**Type:** ClusterIP
+
+**Purpose:**
+
+* Provides normal access to Alertmanager
+* Used by Prometheus to send alerts
+* Can also be used to access Alertmanager API/UI
+
+Example flow:
+
+```
+Prometheus
+   │
+   ▼
+monitoring-kube-prometheus-alertmanager
+   │
+   ▼
+Alertmanager Pods
+```
+
+---
+
+# Service 2: alertmanager-operated
+
+**Type:** Headless Service
+**ClusterIP:** None
+
+**Purpose:**
+
+* Used for internal communication between Alertmanager replicas
+* Allows Alertmanager pods to form a cluster
+
+Example communication:
+
+```
+alertmanager-0  <---->  alertmanager-1
+```
+
+The headless service allows direct DNS-based pod discovery.
+
+Example DNS format:
+
+```
+alertmanager-0.alertmanager-operated
+alertmanager-1.alertmanager-operated
+```
+
+---
+
+# Architecture Overview
+
+```
+                Prometheus
+                     │
+                     ▼
+   monitoring-kube-prometheus-alertmanager
+                     │
+                     ▼
+        ┌─────────────────────────┐
+        │     Alertmanager Pods   │
+        │                         │
+        │  alertmanager-0         │
+        │  alertmanager-1         │
+        └───────────┬─────────────┘
+                    │
+                    ▼
+           alertmanager-operated
+       (internal cluster communication)
+```
+
+---
+
+# Real-World Analogy
+
+Think of the **Pod as a building** and **Services as entry doors**.
+
+```
+Office Building (Pod)
+
+Front Door → Customers
+monitoring-kube-prometheus-alertmanager
+
+Staff Door → Employees
+alertmanager-operated
+```
+
+Both doors lead to the **same building**, but they serve different purposes.
+
+---
+
+# How to Verify This in Kubernetes
+
+You can check the service selectors:
+
+```
+kubectl describe svc monitoring-kube-prometheus-alertmanager -n monitoring
+```
+
+```
+kubectl describe svc alertmanager-operated -n monitoring
+```
+
+Look at the **Selector** field. Both services will match the same pod labels.
+
+You can also check the endpoints:
+
+```
+kubectl get endpoints -n monitoring
+```
+
+This shows which pod IPs each service routes to.
+
+---
+
+# Key Takeaway
+
+In Kubernetes:
+
+* A Service routes traffic to Pods using **label selectors**
+* Multiple Services can point to the **same Pod**
+* This allows different network access patterns for the same workload
+
 ### 🧼 Step 5: Clean UP
 - **Uninstall helm chart**:
 ```bash
