@@ -1,3 +1,10 @@
+# This file is used by
+# 👉 Kustomize
+# It groups multiple YAML files together
+# Using this you can deploy everything with:
+
+# kubectl apply -k .
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: monitoring
