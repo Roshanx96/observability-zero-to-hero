@@ -226,7 +226,7 @@ Email sent
 
 ---
 
-# 9️⃣ Interview-Level Answer (Short)
+# 9️⃣ Interview-Level Answer
 
 You can answer like this:
 
@@ -234,4 +234,3 @@ You can answer like this:
 
 ---
 
-✅ If you want, I can also explain **the 3 most important CRDs used in Prometheus Operator (ServiceMonitor, PodMonitor, PrometheusRule)** — this is a **very common DevOps interview question.**
