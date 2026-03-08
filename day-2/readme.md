@@ -140,7 +140,14 @@ kubectl port-forward service/monitoring-grafana -n monitoring 8080:80
 ```bash
 kubectl port-forward service/alertmanager-operated -n monitoring 9093:9093
 ```
+- 💡 **alertmanager-monitoring-kube-prometheus-alertmanager-0:** Receives alerts from Prometheus, send notidication
+- 💡 **monitoring-grafana-7fbd877d87-lfsnd:** Visualizes metrics collected by Prometheus, provides dashoboards for monitoring
+- 💡 **monitoring-kube-prometheus-operator-bb8469bfd-jmgw7:** Manages Prometheus and Alertmanager automatically, Creates and updates monitoring resources
+- 💡 **monitoring-kube-state-metrics-597898bc4-rg224:** Collects pod metrices
+- 💡 **monitoring-prometheus-node-exporter-6kxdb:** Collects node level metrices. It uses DaemonSets
+- 💡 **prometheus-monitoring-kube-prometheus-prometheus-0:** Collects metrics from all exporters | Stores metrics at a time-series data | Evaluates alert rules | Sends alerts to Alertmanager
 
+  
 ### 🧼 Step 5: Clean UP
 - **Uninstall helm chart**:
 ```bash
