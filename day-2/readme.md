@@ -147,6 +147,222 @@ kubectl port-forward service/alertmanager-operated -n monitoring 9093:9093
 - 💡 **monitoring-prometheus-node-exporter-6kxdb:** Collects node level metrices. It uses DaemonSets
 - 💡 **prometheus-monitoring-kube-prometheus-prometheus-0(UI):** Collects metrics from all exporters | Stores metrics at a time-series data | Evaluates alert rules | Sends alerts to Alertmanager | It stores metrics with timestamp + value.
 
+
+
+# Kubernetes Monitoring Stack - Service Explanation
+
+This monitoring setup is deployed using the **kube-prometheus-stack Helm chart**.
+It provides a complete monitoring solution for a Kubernetes cluster using Prometheus, Grafana, Alertmanager, and exporters.
+
+---
+
+# Services Overview
+
+## 1. alertmanager-operated
+
+**Type:** Headless Service
+**ClusterIP:** None
+**Ports:** 9093, 9094
+
+**Purpose:**
+
+* Used internally for Alertmanager clustering.
+* Enables communication between multiple Alertmanager replicas.
+
+**Ports Explanation:**
+
+| Port | Description                        |
+| ---- | ---------------------------------- |
+| 9093 | Alertmanager API                   |
+| 9094 | Alertmanager cluster communication |
+
+This service allows Alertmanager pods to discover each other.
+
+Example pods:
+
+```
+alertmanager-monitoring-kube-prometheus-alertmanager-0
+alertmanager-monitoring-kube-prometheus-alertmanager-1
+```
+
+---
+
+# 2. monitoring-grafana
+
+**Type:** ClusterIP
+**Port:** 80
+
+**Purpose:**
+
+* Provides Grafana dashboards.
+* Used to visualize metrics collected by Prometheus.
+
+**Access Example**
+
+```
+kubectl port-forward svc/monitoring-grafana 3000:80 -n monitoring
+```
+
+Open in browser:
+
+```
+http://localhost:3000
+```
+
+---
+
+# 3. monitoring-kube-prometheus-alertmanager
+
+**Type:** ClusterIP
+**Ports:** 9093, 8080
+
+**Purpose:**
+
+* Receives alerts from Prometheus.
+* Sends notifications to external systems.
+
+**Example notification channels**
+
+* Email
+* Slack
+* PagerDuty
+* Webhooks
+
+---
+
+# 4. monitoring-kube-prometheus-operator
+
+**Type:** ClusterIP
+**Port:** 443
+
+**Purpose:**
+
+* Manages Prometheus and Alertmanager deployments.
+* Watches Kubernetes custom resources.
+
+**Important resources managed by the operator**
+
+* ServiceMonitor
+* PodMonitor
+* PrometheusRule
+
+---
+
+# 5. monitoring-kube-prometheus-prometheus
+
+**Type:** ClusterIP
+**Ports:** 9090, 8080
+
+**Purpose:**
+
+* Provides Prometheus API and Web UI.
+* Prometheus collects and stores metrics from the cluster.
+
+**Access Example**
+
+```
+kubectl port-forward svc/monitoring-kube-prometheus-prometheus 9090 -n monitoring
+```
+
+Open:
+
+```
+http://localhost:9090
+```
+
+---
+
+# 6. monitoring-kube-state-metrics
+
+**Type:** ClusterIP
+**Port:** 8080
+
+**Purpose:**
+
+* Exposes metrics about Kubernetes objects.
+
+**Examples of metrics**
+
+```
+kube_pod_status_phase
+kube_deployment_status_replicas
+kube_node_status_capacity
+```
+
+Prometheus scrapes these metrics for monitoring cluster state.
+
+---
+
+# 7. monitoring-prometheus-node-exporter
+
+**Type:** ClusterIP
+**Port:** 9100
+
+**Purpose:**
+
+* Collects system-level metrics from Kubernetes nodes.
+
+**Examples of metrics**
+
+* CPU usage
+* Memory usage
+* Disk usage
+* Network traffic
+
+Example metric:
+
+```
+node_cpu_seconds_total
+```
+
+---
+
+# 8. prometheus-operated
+
+**Type:** Headless Service
+**ClusterIP:** None
+**Port:** 9090
+
+**Purpose:**
+
+* Used for internal communication between Prometheus StatefulSet pods.
+
+Example DNS format:
+
+```
+prometheus-0.prometheus-operated
+```
+
+---
+
+# Monitoring Architecture
+
+```
+Node Exporter -----------|
+                         |
+kube-state-metrics ----- | 
+                         |----> Prometheus ----> Grafana
+Applications ------------|           |
+                                     |
+                                     v
+                               Alertmanager
+```
+
+---
+
+# Component Responsibilities
+
+| Component           | Responsibility                     |
+| ------------------- | ---------------------------------- |
+| Prometheus          | Collects and stores metrics        |
+| Grafana             | Displays dashboards                |
+| Alertmanager        | Sends alerts and notifications     |
+| Prometheus Operator | Manages monitoring resources       |
+| kube-state-metrics  | Provides Kubernetes object metrics |
+| Node Exporter       | Provides node system metrics       |
+
+---
+
   
 ### 🧼 Step 5: Clean UP
 - **Uninstall helm chart**:
