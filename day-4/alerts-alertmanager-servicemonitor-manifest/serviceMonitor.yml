@@ -1,20 +1,29 @@
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+# This file tells Prometheus which service to monitor.
+# It is used with Prometheus Operator.
+
+
+apiVersion: monitoring.coreos.com/v1        # Prometheus Operator API
+kind: ServiceMonitor                        # Defines which service Prometheus should monitor
+
 metadata:
   labels:
     app: a-service-service-monitor
-    release: monitoring
-  name: a-service-service-monitor
-  namespace: monitoring
+    release: monitoring                     # Helm release label
+  name: a-service-service-monitor           # ServiceMonitor name
+  namespace: monitoring                     # Namespace where ServiceMonitor exists
+
 spec:
-  jobLabel: job
+  jobLabel: job                             # Label used as Prometheus job name
+
   endpoints:
-    - interval: 2s
-      port: a-service-port
-      path: /metrics
+    - interval: 2s                          # Prometheus scrapes metrics every 2 seconds
+      port: a-service-port                  # Service port name exposing metrics
+      path: /metrics                        # Metrics endpoint
+
   selector:
     matchLabels:
-      app: a-service
+      app: a-service                        # Select services with label app=a-service
+
   namespaceSelector:
     matchNames:
-      - dev
+      - dev                                 # Service exists in "dev" namespace
