@@ -1,34 +1,45 @@
-apiVersion: monitoring.coreos.com/v1alpha1
-kind: AlertmanagerConfig
+# This file tells Alertmanager what to do when an alert happens.
+# Think of it like:
+# 👉 If this problem happens → send an email.
+
+apiVersion: monitoring.coreos.com/v1alpha1   # API used by Prometheus Operator for Alertmanager configuration
+kind: AlertmanagerConfig                    # Defines Alertmanager routing and receivers
+
 metadata:
-  name: main-rules-alert-config
-  namespace: monitoring
+  name: main-rules-alert-config             # Name of the Alertmanager configuration
+  namespace: monitoring                     # Namespace where Alertmanager is running
   labels:
-    release: monitoring
+    release: monitoring                     # Helm release label so Prometheus Operator can detect it
+
 spec:
   route:
-    repeatInterval: 30m
-    receiver: 'null'
+    repeatInterval: 30m                     # Default time before repeating an alert notification
+    receiver: 'null'                        # Default receiver (do nothing if no rule matches)
+
     routes:
     - matchers:
-      - name: alertname
+      - name: alertname                     # Match alerts with name "HighCpuUsage"
         value: HighCpuUsage
-      receiver: 'send-email'
+      receiver: 'send-email'                # Send this alert to email receiver
+
     - matchers:
-      - name: alertname
+      - name: alertname                     # Match alerts with name "PodRestart"
         value: PodRestart
-      receiver: 'send-email'
-      repeatInterval: 5m
+      receiver: 'send-email'                # Send email for pod restart alerts
+      repeatInterval: 5m                    # Repeat notification every 5 minutes
+
   receivers:
-  - name: 'send-email'
+
+  - name: 'send-email'                      # Receiver definition for sending email alerts
     emailConfigs:
-    - to: YOUR_EMAIL_ID
-      from: YOUR_EMAIL_ID
-      sendResolved: false
-      smarthost: smtp.gmail.com:587
-      authUsername: YOUR_EMAIL_ID
-      authIdentity: YOUR_EMAIL_ID
+    - to: YOUR_EMAIL_ID                     # Email address where alert will be sent
+      from: YOUR_EMAIL_ID                   # Sender email address
+      sendResolved: false                   # Do not send email when alert is resolved
+      smarthost: smtp.gmail.com:587         # Gmail SMTP server
+      authUsername: YOUR_EMAIL_ID           # SMTP username
+      authIdentity: YOUR_EMAIL_ID           # SMTP identity
       authPassword:
-        name: mail-pass
-        key: gmail-pass
-  - name: 'null'
+        name: mail-pass                     # Kubernetes Secret name storing password
+        key: gmail-pass                     # Secret key that contains the password
+
+  - name: 'null'                            # Null receiver (alerts sent here are ignored)
