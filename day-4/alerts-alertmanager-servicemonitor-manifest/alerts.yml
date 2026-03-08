@@ -1,27 +1,44 @@
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
+# This file creates alert rules for Prometheus.
+# It tells Prometheus:
+# 👉 When should an alert trigger?
+
+apiVersion: monitoring.coreos.com/v1        # API used by Prometheus Operator
+kind: PrometheusRule                        # Defines alert rules for Prometheus
+
 metadata:
-  name: custom-alert-rules
-  namespace: monitoring
+  name: custom-alert-rules                  # Name of alert rule set
+  namespace: monitoring                     # Namespace where Prometheus runs
   labels:
-    release: monitoring # if you installed through then you've to mention the release name of helm, otherwise prometheus will not recognize it
+    release: monitoring                     # Helm release label required for Prometheus to detect rules
+
 spec:
   groups:
-  - name: custom.rules
+  - name: custom.rules                      # Group name for alerts
     rules:
-    - alert: HighCpuUsage
+
+    - alert: HighCpuUsage                   # Alert name
       expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 50
-      for: 5m
+                                          # Expression to calculate CPU usage
+                                          # If CPU usage is more than 50% → alert triggers
+
+      for: 5m                              # Alert triggers only if condition stays true for 5 minutes
+
       labels:
-        severity: warning
+        severity: warning                  # Alert severity level
+
       annotations:
-        summary: "High CPU usage on instance {{ $labels.instance }}"
+        summary: "High CPU usage on instance {{ $labels.instance }}"  # Short alert message
         description: "CPU usage is above 50% (current value: {{ $value }}%)"
-    - alert: PodRestart
+
+    - alert: PodRestart                    # Alert name
       expr: kube_pod_container_status_restarts_total > 2
-      for: 0m
+                                          # Alert if container restarts more than 2 times
+
+      for: 0m                              # Alert immediately when condition happens
+
       labels:
-        severity: critical
+        severity: critical                 # Critical alert level
+
       annotations:
         summary: "Pod restart detected in namespace {{ $labels.namespace }}"
         description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has restarted {{ $value }} times"
